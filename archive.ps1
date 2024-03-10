@@ -1,5 +1,4 @@
 #!/usr/bin/env pwsh
-#Requires -RunAsAdministrator
 
 <#
  _   _                       _          ___     __
@@ -32,52 +31,48 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
+
 [CmdletBinding()]
 
 param (
     [Parameter(Mandatory = $false)]
-    [ValidateNotNullOrEmpty()]
     [string]
-    $ModulePath = "C:\Program Files (x86)\Common Files\AMXShare\Duet\module",
+    $Path = ".",
 
     [Parameter(Mandatory = $false)]
-    [switch]
-    $Delete = $false
+    [string]
+    $OutDir = "dist"
 )
 
-$prevPWD = $PWD
-Set-Location $PSScriptRoot
-
 try {
-    $files = Get-ChildItem -File "**/*.tko" -Recurse | Where-Object { $_.FullName -notmatch "(.git|.history|node_modules)" }
+    $Path = Resolve-Path -Path $Path
 
-    if (!$files) {
-        Write-Host "No files found"
+    $manifest = Get-Content -Path "$Path/manifest.json" -Raw | ConvertFrom-Json
+
+    if (!$manifest) {
+        Write-Error "No manifest.json file found in $Path"
         exit 1
     }
 
-    $ModulePath = Resolve-Path $ModulePath
+    $version = $manifest.version
+    $name = $manifest.name
 
-    !$Delete ? (Write-Host "Creating symlinks...") : (Write-Host "Deleting symlinks...")
-
-    foreach ($file in $files) {
-        $linkPath = "$ModulePath/$($file.Name)"
-
-        if ($Delete) {
-            Write-Verbose "Deleting symlink: $linkPath"
-            Remove-Item -Path $linkPath -Force | Out-Null
-            continue
-        }
-
-        $target = $file.FullName
-        Write-Verbose "Creating symlink: $linkPath -> $target"
-        New-Item -ItemType SymbolicLink -Path $linkPath -Target $target -Force | Out-Null
+    foreach ($file in $manifest.files) {
+        $files += @(Get-ChildItem -File $file -ErrorAction Stop | Where-Object { $_.FullName -notmatch "(.git|node_modules|.history|dist)" })
     }
+
+    $files += @("manifest.json")
+
+    if (-not(Test-Path -Path "$Path/$OutDir")) {
+        New-Item -Path "$Path/$OutDir" -Type Directory | Out-Null
+    }
+
+    $zip = "$Path/$OutDir/$name.$version.archive.zip"
+    Compress-Archive -Path $files -DestinationPath $zip -Force
+
+    (Get-FileHash $zip).Hash.ToLower() | Out-File -FilePath "$zip.sha256" -Encoding ascii
 }
 catch {
     Write-Host $_.Exception.GetBaseException().Message -ForegroundColor Red
     exit 1
-}
-finally {
-    Set-Location $prevPWD
 }
