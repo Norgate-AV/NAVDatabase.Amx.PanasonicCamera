@@ -111,22 +111,20 @@ define_function Send(char payload[]) {
 }
 
 
-define_function char[NAV_MAX_BUFFER] BuildPayload(char cmd[]) {
+define_function BuildPayload(char cmd[]) {
     stack_var char result[NAV_MAX_BUFFER]
 
-    result = ''
-
     if (!length_array(module.Device.SocketConnection.Address) || module.Device.SocketConnection.IsConnected) {
-        return result
+        return
     }
 
     if (!length_array(cmd)) {
-        return result
+        return
     }
 
     result =    "
                     'GET /cgi-bin/aw_ptz?cmd=', cmd, '&res=1 HTTP/1.1', NAV_CR, NAV_LF,
-                    'User-Agent: AMX-Master', NAV_CR, NAV_LF,
+                    // 'User-Agent: AMX-Master', NAV_CR, NAV_LF,
                     'Host: ', module.Device.SocketConnection.Address, NAV_CR, NAV_LF,
                     'Connection: Close', NAV_CR, NAV_LF
                 "
@@ -138,9 +136,9 @@ define_function char[NAV_MAX_BUFFER] BuildPayload(char cmd[]) {
                     "
     }
 
-    return "result, NAV_CR, NAV_LF"
+    payload = "result, NAV_CR, NAV_LF"
 
-    // NAVClientSocketOpen(dvPort.PORT, cIPAddress, IP_PORT, IP_TCP)
+    OpenSocketConnection()
 }
 
 
