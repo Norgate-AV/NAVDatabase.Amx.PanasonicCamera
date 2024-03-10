@@ -58,9 +58,9 @@ constant integer IP_PORT    = 80
 
 constant integer PTZ_STOP = 50
 
-constant integer AUTO_FOCUS_STATUS_UNKNOWN = 0
-constant integer AUTO_FOCUS_STATUS_ON = 1
-constant integer AUTO_FOCUS_STATUS_OFF = 2
+constant integer AUTO_FOCUS_STATUS_UNKNOWN  = 0
+constant integer AUTO_FOCUS_STATUS_ON       = 1
+constant integer AUTO_FOCUS_STATUS_OFF      = 2
 
 (***********************************************************)
 (*              DATA TYPE DEFINITIONS GO BELOW             *)
@@ -72,18 +72,18 @@ DEFINE_TYPE
 (***********************************************************)
 DEFINE_VARIABLE
 
-volatile char cBasicAuthB64[255]
+volatile char basicAuthB64[255]
 
-volatile char cPayload[NAV_MAX_BUFFER]
+volatile char payload[NAV_MAX_BUFFER]
 
-volatile integer iTiltSpeed = 20
-volatile integer iPanSpeed = 20
-volatile integer iZoomSpeed = 10
-volatile integer iFocusSpeed = 10
+volatile integer tiltSpeed     = 20
+volatile integer panSpeed      = 20
+volatile integer zoomSpeed     = 10
+volatile integer focusSpeed    = 10
 
-volatile integer iAutoFocus = AUTO_FOCUS_STATUS_UNKNOWN
+volatile integer autoFocus = AUTO_FOCUS_STATUS_UNKNOWN
 
-volatile integer iGetAutoFocus = false
+volatile integer getAutoFocus = false
 
 
 (***********************************************************)
@@ -131,10 +131,10 @@ define_function char[NAV_MAX_BUFFER] BuildPayload(char cmd[]) {
                     'Connection: Close', NAV_CR, NAV_LF
                 "
 
-    if (length_array(cBasicAuthB64)) {
+    if (length_array(basicAuthB64)) {
         result =    "
                         result,
-                        'Authorization: Basic ', cBasicAuthB64, NAV_CR, NAV_LF
+                        'Authorization: Basic ', basicAuthB64, NAV_CR, NAV_LF
                     "
     }
 
@@ -144,8 +144,8 @@ define_function char[NAV_MAX_BUFFER] BuildPayload(char cmd[]) {
 }
 
 
-define_function char[NAV_MAX_CHARS] BuildCommand(char cAtt[], char cValue[]) {
-    return "'#', cAtt, cValue"
+define_function char[NAV_MAX_CHARS] BuildCommand(char att[], char value[]) {
+    return "'#', att, value"
 }
 
 
@@ -175,14 +175,14 @@ define_function NAVModulePropertyEventCallback(_NAVModulePropertyEvent event) {
             module.Device.SocketConnection.Address = event.Args[1]
             module.Device.SocketConnection.Port = IP_PORT
 
-            if (iAutoFocus == AUTO_FOCUS_STATUS_UNKNOWN) {
+            if (autoFocus == AUTO_FOCUS_STATUS_UNKNOWN) {
                 wait 50 {
                     BuildPayload(BuildCommand('D1', ''))
                 }
             }
         }
         case 'BASIC_AUTH_B64': {
-            cBasicAuthB64 = event.Args[1]
+            basicAuthB64 = event.Args[1]
         }
     }
 }
@@ -234,7 +234,7 @@ data_event[dvPort] {
             module.Device.SocketConnection.IsConnected = true
         }
 
-        Send(cPayload)
+        Send(payload)
     }
     offline: {
         if (data.device.number == 0) {
@@ -242,9 +242,9 @@ data_event[dvPort] {
             Reset()
         }
 
-        if (iGetAutoFocus) {
+        if (getAutoFocus) {
             BuildPayload(BuildCommand('D1', ''))
-            iGetAutoFocus = false
+            getAutoFocus = false
         }
     }
     onerror: {
@@ -260,10 +260,10 @@ data_event[dvPort] {
 
         select {
             active (NAVContains(data.text, 'd11')): {
-                iAutoFocus = AUTO_FOCUS_STATUS_ON
+                autoFocus = AUTO_FOCUS_STATUS_ON
             }
             active (NAVContains(data.text, 'd10')): {
-                iAutoFocus = AUTO_FOCUS_STATUS_OFF
+                autoFocus = AUTO_FOCUS_STATUS_OFF
             }
         }
 
@@ -301,7 +301,7 @@ data_event[vdvObject] {
 
 channel_event[vdvObject, 0] {
     on: {
-        iGetAutoFocus = false
+        getAutoFocus = false
 
         switch (channel.channel) {
             case PWR_ON: {
@@ -311,37 +311,37 @@ channel_event[vdvObject, 0] {
                 BuildPayload(BuildCommand('O', '0'))
             }
             case TILT_UP: {
-                BuildPayload(BuildCommand('T', itoa(PTZ_STOP + iTiltSpeed)))
+                BuildPayload(BuildCommand('T', itoa(PTZ_STOP + tiltSpeed)))
             }
             case TILT_DN: {
-                BuildPayload(BuildCommand('T', itoa(PTZ_STOP - iTiltSpeed)))
+                BuildPayload(BuildCommand('T', itoa(PTZ_STOP - tiltSpeed)))
             }
             case PAN_LT: {
-                BuildPayload(BuildCommand('P', itoa(PTZ_STOP - iPanSpeed)))
+                BuildPayload(BuildCommand('P', itoa(PTZ_STOP - panSpeed)))
             }
             case PAN_RT: {
-                BuildPayload(BuildCommand('P', itoa(PTZ_STOP + iPanSpeed)))
+                BuildPayload(BuildCommand('P', itoa(PTZ_STOP + panSpeed)))
             }
             case ZOOM_IN: {
-                BuildPayload(BuildCommand('Z', itoa(PTZ_STOP + iZoomSpeed)))
+                BuildPayload(BuildCommand('Z', itoa(PTZ_STOP + zoomSpeed)))
             }
             case ZOOM_OUT: {
-                BuildPayload(BuildCommand('Z', itoa(PTZ_STOP - iZoomSpeed)))
+                BuildPayload(BuildCommand('Z', itoa(PTZ_STOP - zoomSpeed)))
             }
             case FOCUS_NEAR: {
-                BuildPayload(BuildCommand('F', itoa(PTZ_STOP + iFocusSpeed)))
+                BuildPayload(BuildCommand('F', itoa(PTZ_STOP + focusSpeed)))
             }
             case FOCUS_FAR: {
-                BuildPayload(BuildCommand('F', itoa(PTZ_STOP - iFocusSpeed)))
+                BuildPayload(BuildCommand('F', itoa(PTZ_STOP - focusSpeed)))
             }
             case AUTO_FOCUS_ON: {
-                iGetAutoFocus = true;
+                getAutoFocus = true;
                 BuildPayload(BuildCommand('D1', '1'))
             }
             case AUTO_FOCUS: {
-                iGetAutoFocus = true;
+                getAutoFocus = true;
 
-                if (iAutoFocus == AUTO_FOCUS_STATUS_ON) {
+                if (autoFocus == AUTO_FOCUS_STATUS_ON) {
                     BuildPayload(BuildCommand('D1', '0'))
                 }
                 else {
@@ -362,7 +362,7 @@ channel_event[vdvObject, 0] {
         }
     }
     off: {
-        iGetAutoFocus = false;
+        getAutoFocus = false;
 
         switch (channel.channel) {
             case TILT_UP:
@@ -390,7 +390,7 @@ channel_event[vdvObject, 0] {
                 }
             }
             case AUTO_FOCUS_ON: {
-                iGetAutoFocus = true;
+                getAutoFocus = true;
                 BuildPayload(BuildCommand('D1', '0'))
             }
         }
@@ -399,27 +399,27 @@ channel_event[vdvObject, 0] {
 
 
 level_event[vdvObject, TILT_SPEED_LVL] {
-    iTiltSpeed = level.value
+    tiltSpeed = level.value
 }
 
 
 level_event[vdvObject, PAN_SPEED_LVL] {
-    iPanSpeed = level.value
+    panSpeed = level.value
 }
 
 
 level_event[vdvObject, ZOOM_SPEED_LVL] {
-    iZoomSpeed = level.value
+    zoomSpeed = level.value
 }
 
 
 level_event[vdvObject, FOCUS_SPEED_LVL] {
-    iFocusSpeed = level.value
+    focusSpeed = level.value
 }
 
 
 timeline_event[TL_NAV_FEEDBACK] {
-    [vdvObject, AUTO_FOCUS_FB] = (iAutoFocus == AUTO_FOCUS_STATUS_ON)
+    [vdvObject, AUTO_FOCUS_FB] = (autoFocus == AUTO_FOCUS_STATUS_ON)
 }
 
 
