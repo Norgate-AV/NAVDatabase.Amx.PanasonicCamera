@@ -13,18 +13,64 @@
 
 ---
 
-Description
+AMX NetLinx module for Panasonic cameras.
 
-## Contents 📖
+## Contents :book:
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
+-   [Installation :zap:](#installation-zap)
+-   [Usage :rocket:](#usage-rocket)
 -   [Team :soccer:](#team-soccer)
 -   [Contributors :sparkles:](#contributors-sparkles)
 -   [LICENSE :balance_scale:](#license-balance_scale)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## Installation :zap:
+
+This module can be installed using [Scoop](https://scoop.sh/).
+
+```powershell
+scoop bucket add norgateav-amx https://github.com/Norgate-AV/scoop-norgateav-amx
+scoop install navdatabase-amx-panasonic-camera
+```
+
+## Usage :rocket:
+
+Use standard SNAPI channels to control the PTZ of camera.
+
+```netlinx
+DEFINE_DEVICE
+
+// The real device
+// dvPanasonicCamera           = 0:4:0             // IP/Socket Connection
+
+// Virtual Devices
+vdvPanasonicCamera             = 33201:1:0         // The interface between the device and the control system
+
+// User Interface
+dvTP                            = 10001:1:0         // Main UI
+
+
+define_module 'mPanasonicCamera' PanasonicCameraComm(vdvPanasonicCamera, dvPanasonicCamera)
+
+
+DEFINE_EVENT
+
+data_event[vdvPanasonicCamera] {
+    online: {
+        send_command data.device, "'PROPERTY-IP_ADDRESS,', '192.168.1.21'"
+
+        // Camera should be setup with a user specifically for the control system
+        // User type should be "Camera Control" with "Basic Auth" enabled
+        // Basic auth is the base64 encoded string of <username:password>
+        send_command data.device, "'PROPERTY-BASIC_AUTH_B64,', 'YW14OjE5ODg='"
+    }
+}
+
+```
 
 ## Team :soccer:
 
