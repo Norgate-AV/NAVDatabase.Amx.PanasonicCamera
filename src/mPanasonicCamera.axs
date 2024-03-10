@@ -222,6 +222,114 @@ define_function NAVStringGatherCallback(_NAVStringGatherResult args) {
 #END_IF
 
 
+// define_function ChannelEventHandler(tchannel channel, char state) {
+//     stack_var char payload[NAV_MAX_BUFFER]
+
+//     getAutoFocus = false
+
+//     switch (state) {
+//         case true: {
+//             switch (channel.channel) {
+//                 case PWR_ON: {
+//                     payload = BuildPayload(BuildCommand('O', '1'))
+//                 }
+//                 case PWR_OFF: {
+//                     payload = BuildPayload(BuildCommand('O', '0'))
+//                 }
+//                 case TILT_UP: {
+//                     payload = BuildPayload(BuildCommand('T', itoa(PTZ_STOP + tiltSpeed)))
+//                 }
+//                 case TILT_DN: {
+//                     payload = BuildPayload(BuildCommand('T', itoa(PTZ_STOP - tiltSpeed)))
+//                 }
+//                 case PAN_LT: {
+//                     payload = BuildPayload(BuildCommand('P', itoa(PTZ_STOP - panSpeed)))
+//                 }
+//                 case PAN_RT: {
+//                     payload = BuildPayload(BuildCommand('P', itoa(PTZ_STOP + panSpeed)))
+//                 }
+//                 case ZOOM_IN: {
+//                     payload = BuildPayload(BuildCommand('Z', itoa(PTZ_STOP + zoomSpeed)))
+//                 }
+//                 case ZOOM_OUT: {
+//                     payload = BuildPayload(BuildCommand('Z', itoa(PTZ_STOP - zoomSpeed)))
+//                 }
+//                 case FOCUS_NEAR: {
+//                     payload = BuildPayload(BuildCommand('F', itoa(PTZ_STOP + focusSpeed)))
+//                 }
+//                 case FOCUS_FAR: {
+//                     payload = BuildPayload(BuildCommand('F', itoa(PTZ_STOP - focusSpeed)))
+//                 }
+//                 case AUTO_FOCUS_ON: {
+//                     getAutoFocus = true;
+//                     payload = BuildPayload(BuildCommand('D1', '1'))
+//                 }
+//                 case AUTO_FOCUS: {
+//                     getAutoFocus = true;
+
+//                     if (autoFocus == AUTO_FOCUS_STATUS_ON) {
+//                         payload = BuildPayload(BuildCommand('D1', '0'))
+//                     }
+//                     else {
+//                         payload = BuildPayload(BuildCommand('D1', '1'))
+//                     }
+
+//                 }
+//                 case NAV_PRESET_1:
+//                 case NAV_PRESET_2:
+//                 case NAV_PRESET_3:
+//                 case NAV_PRESET_4:
+//                 case NAV_PRESET_5:
+//                 case NAV_PRESET_6:
+//                 case NAV_PRESET_7:
+//                 case NAV_PRESET_8: {
+//                     payload = BuildPayload(BuildCommand('R', format('%02d', NAVFindInArrayINTEGER(NAV_PRESET, channel.channel) - 1)))
+//                 }
+//             }
+//         }
+//         case false: {
+//             switch (channel.channel) {
+//                 case TILT_UP:
+//                 case TILT_DN: {
+//                     wait 1 {
+//                         payload = BuildPayload(BuildCommand('T', itoa(PTZ_STOP)))
+//                     }
+//                 }
+//                 case PAN_LT:
+//                 case PAN_RT: {
+//                     wait 1 {
+//                         payload = BuildPayload(BuildCommand('P', itoa(PTZ_STOP)))
+//                     }
+//                 }
+//                 case ZOOM_IN:
+//                 case ZOOM_OUT: {
+//                     wait 1 {
+//                         payload = BuildPayload(BuildCommand('Z', itoa(PTZ_STOP)))
+//                     }
+//                 }
+//                 case FOCUS_NEAR:
+//                 case FOCUS_FAR: {
+//                     wait 1 {
+//                         payload = BuildPayload(BuildCommand('F', itoa(PTZ_STOP)))
+//                     }
+//                 }
+//                 case AUTO_FOCUS_ON: {
+//                     getAutoFocus = true;
+//                     payload = BuildPayload(BuildCommand('D1', '0'))
+//                 }
+//             }
+//         }
+//     }
+
+//     if (!length_array(payload)) {
+//         return
+//     }
+
+//     payload = payload
+//     OpenSocketConnection()
+// }
+
+
 (***********************************************************)
 (*                STARTUP CODE GOES BELOW                  *)
 (***********************************************************)
