@@ -236,6 +236,8 @@ DEFINE_EVENT
 
 data_event[dvPort] {
     online: {
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, 'mPanasonicCamera => Socket Online')
+
         if (data.device.number == 0) {
             module.Device.SocketConnection.IsConnected = true
         }
@@ -243,6 +245,8 @@ data_event[dvPort] {
         Send(payload)
     }
     offline: {
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, 'mPanasonicCamera => Socket Offline')
+
         if (data.device.number == 0) {
             NAVClientSocketClose(data.device.port)
             Reset()
@@ -254,6 +258,8 @@ data_event[dvPort] {
         }
     }
     onerror: {
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, 'mPanasonicCamera => Socket Error')
+
         if (data.device.number == 0) {
             Reset()
         }
