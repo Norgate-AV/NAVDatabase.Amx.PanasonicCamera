@@ -45,7 +45,7 @@ Use standard SNAPI channels to control the PTZ of camera.
 DEFINE_DEVICE
 
 // The real device
-// dvPanasonicCamera           = 0:4:0             // IP/Socket Connection
+dvPanasonicCamera           = 0:4:0             // IP/Socket Connection
 
 // Virtual Devices
 vdvPanasonicCamera             = 33201:1:0         // The interface between the device and the control system
