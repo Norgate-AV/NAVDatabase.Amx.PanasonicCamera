@@ -12,6 +12,7 @@ MODULE_NAME='mPanasonicCamera'  (
 #include 'NAVFoundation.SocketUtils.axi'
 #include 'NAVFoundation.ArrayUtils.axi'
 #include 'NAVFoundation.StringUtils.axi'
+#include 'NAVFoundation.Encoding.Base64.axi'
 
 /*
  _   _                       _          ___     __
@@ -85,6 +86,8 @@ volatile integer autoFocus = AUTO_FOCUS_STATUS_UNKNOWN
 
 volatile integer getAutoFocus = false
 
+volatile _NAVCredential credential = { '', '' }
+
 
 (***********************************************************)
 (*               LATCHING DEFINITIONS GO BELOW             *)
@@ -140,6 +143,13 @@ define_function BuildPayload(char cmd[]) {
                     "
     }
 
+    if (!length_array(basicAuthB64) && length_array(credential.Username) && length_array(credential.Password)) {
+        result =    "
+                        result,
+                        'Authorization: Basic ', GetAuth(), NAV_CR, NAV_LF
+                    "
+    }
+
     payload = "result, NAV_CR, NAV_LF"
 
     OpenSocketConnection()
@@ -170,6 +180,11 @@ define_function Reset() {
 }
 
 
+define_function char[NAV_MAX_BUFFER] GetAuth() {
+    return NAVBase64Encode("credential.Username, ':', credential.Password")
+}
+
+
 #IF_DEFINED USING_NAV_MODULE_BASE_PROPERTY_EVENT_CALLBACK
 define_function NAVModulePropertyEventCallback(_NAVModulePropertyEvent event) {
     if (event.Device != vdvObject) {
@@ -178,7 +193,7 @@ define_function NAVModulePropertyEventCallback(_NAVModulePropertyEvent event) {
 
     switch (event.Name) {
         case NAV_MODULE_PROPERTY_EVENT_IP_ADDRESS: {
-            module.Device.SocketConnection.Address = event.Args[1]
+            module.Device.SocketConnection.Address = NAVTrimString(event.Args[1])
             module.Device.SocketConnection.Port = IP_PORT
 
             if (autoFocus == AUTO_FOCUS_STATUS_UNKNOWN) {
@@ -188,7 +203,19 @@ define_function NAVModulePropertyEventCallback(_NAVModulePropertyEvent event) {
             }
         }
         case 'BASIC_AUTH_B64': {
-            basicAuthB64 = event.Args[1]
+            // Pass the base64 encoded string directly
+            basicAuthB64 = NAVTrimString(event.Args[1])
+        }
+        case 'BASIC_AUTH': {
+            // Pass the username and password separated by a colon to be base64 encoded
+            // Eg. username:password => amx:1988 => YW14OjE5ODg=
+            basicAuthB64 = NAVBase64Encode(NAVTrimString(event.Args[1]))
+        }
+        case 'USERNAME': {
+            credential.Username = NAVTrimString(event.Args[1])
+        }
+        case 'PASSWORD': {
+            credential.Password = NAVTrimString(event.Args[1])
         }
     }
 }
