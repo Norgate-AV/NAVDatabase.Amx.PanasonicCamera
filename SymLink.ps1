@@ -41,6 +41,10 @@ param (
     $ModulePath = "C:\Program Files (x86)\Common Files\AMXShare\Duet\module",
 
     [Parameter(Mandatory = $false)]
+    [string]
+    $IncludePath = "C:\Program Files (x86)\Common Files\AMXShare\AXIs",
+
+    [Parameter(Mandatory = $false)]
     [switch]
     $Delete = $false
 )
@@ -49,29 +53,72 @@ $prevPWD = $PWD
 Set-Location $PSScriptRoot
 
 try {
-    $files = Get-ChildItem -File "**/*.tko" -Recurse | Where-Object { $_.FullName -notmatch "(.git|.history|node_modules)" }
+    $directories = Get-ChildItem -Directory -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch "(\.\w+|node_modules|dist)" }
 
-    if (!$files) {
-        Write-Host "No files found"
+    # Needed for scoop as all files with be in the root directory
+    $directories += $PWD
+
+    $moduleFiles = $directories | Get-ChildItem -Filter "*.axs"
+    $includeFiles = $directories | Get-ChildItem -Filter "*.axi"
+
+    if (!$moduleFiles) {
+        Write-Host "No module files found"
         exit 1
     }
 
+    # Ensure there is a compiled TKO file for each AXS file
+    foreach ($file in $moduleFiles) {
+        if (!(Test-Path $($file.FullName -replace ".axs", ".tko"))) {
+            Write-Host "TKO file not found for $file" -ForegroundColor Yellow
+            exit 1
+        }
+    }
+
     $ModulePath = Resolve-Path $ModulePath
+    $IncludePath = Resolve-Path $IncludePath
 
     !$Delete ? (Write-Host "Creating symlinks...") : (Write-Host "Deleting symlinks...")
 
-    foreach ($file in $files) {
-        $linkPath = "$ModulePath/$($file.Name)"
+    # It's possible to have a module without any AXI files
+    if ($includeFiles) {
+        foreach ($file in $includeFiles) {
+            $path = "$IncludePath\$($file.Name)"
+
+            if ($Delete) {
+                Write-Verbose "Deleting symlink: $path"
+                Remove-Item -Path $path -Force | Out-Null
+                continue
+            }
+
+            $target = $file.FullName
+
+            Write-Verbose "Creating symlink: $path -> $target"
+            New-Item -ItemType SymbolicLink -Path $path -Target $target -Force | Out-Null
+        }
+    }
+
+    foreach ($file in $moduleFiles) {
+        $axsPath = "$ModulePath\$($file.Name)"
+        $tkoPath = "$ModulePath\$($file.Name -replace ".axs", ".tko")"
+
+        $axsTarget = $file.FullName
+        $tkoTarget = $file.FullName -replace ".axs", ".tko"
 
         if ($Delete) {
-            Write-Verbose "Deleting symlink: $linkPath"
-            Remove-Item -Path $linkPath -Force | Out-Null
+            Write-Verbose "Deleting symlink: $axsPath"
+            Remove-Item -Path $axsPath -Force | Out-Null
+
+            Write-Verbose "Deleting symlink: $tkoPath"
+            Remove-Item -Path $tkoPath -Force | Out-Null
+
             continue
         }
 
-        $target = $file.FullName
-        Write-Verbose "Creating symlink: $linkPath -> $target"
-        New-Item -ItemType SymbolicLink -Path $linkPath -Target $target -Force | Out-Null
+        Write-Verbose "Creating symlink: $axsPath -> $axsTarget"
+        New-Item -ItemType SymbolicLink -Path $axsPath -Target $axsTarget -Force | Out-Null
+
+        Write-Verbose "Creating symlink: $tkoPath -> $tkoTarget"
+        New-Item -ItemType SymbolicLink -Path $tkoPath -Target $tkoTarget -Force | Out-Null
     }
 }
 catch {
