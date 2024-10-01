@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.1.0](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/compare/v1.0.0...v1.1.0) (2024-10-01)
+
+### 🌟 Features
+
+-   add improved auth options ([3355d70](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/3355d7058faf1242bd63e385f078e7828ef34d62))
+
+### 🐛 Bug Fixes
+
+-   fix release scripts ([a12569f](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/a12569f235cbd88a6db3b2a8ab53db4b0ea6a891))
+
 ## 1.0.0 (2024-03-10)
 
 ### 🌟 Features

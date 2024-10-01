@@ -1,7 +1,7 @@
 {
     "name": "NAVDatabase.Amx.PanasonicCamera",
     "description": "NetLinx module for Panasonic cameras",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "license": "MIT",
     "files": ["src/*.tko", "SymLink.ps1", "LICENSE", "README.md"],
     "repository": {
