@@ -1,34 +1,40 @@
 # Changelog
 
+## [1.2.0](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/compare/v1.1.0...v1.2.0) (2024-12-09)
+
+### 🌟 Features
+
+- double default ptz speeds ([8e61df1](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/8e61df1703999a8d943d6972c8f50af27624f302))
+
 ## [1.1.0](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/compare/v1.0.0...v1.1.0) (2024-10-01)
 
 ### 🌟 Features
 
--   add improved auth options ([3355d70](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/3355d7058faf1242bd63e385f078e7828ef34d62))
+- add improved auth options ([3355d70](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/3355d7058faf1242bd63e385f078e7828ef34d62))
 
 ### 🐛 Bug Fixes
 
--   fix release scripts ([a12569f](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/a12569f235cbd88a6db3b2a8ab53db4b0ea6a891))
+- fix release scripts ([a12569f](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/a12569f235cbd88a6db3b2a8ab53db4b0ea6a891))
 
 ## 1.0.0 (2024-03-10)
 
 ### 🌟 Features
 
--   add socket online/offline/error logging ([0ebdce1](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/0ebdce1b9ae3967d93db4b1685d8cdeb5fdd982d))
--   setup semantic-release ([52be067](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/52be0670ce1e1ce116933d98b4159b566f08b831))
+- add socket online/offline/error logging ([0ebdce1](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/0ebdce1b9ae3967d93db4b1685d8cdeb5fdd982d))
+- setup semantic-release ([52be067](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/52be0670ce1e1ce116933d98b4159b566f08b831))
 
 ### 📖 Documentation
 
--   update readme ([af8024a](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/af8024a6640d2e556226f7ed5e26bf77ff897da2))
+- update readme ([af8024a](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/af8024a6640d2e556226f7ed5e26bf77ff897da2))
 
 ### 💅 Style
 
--   add some line breaks ([10e6105](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/10e61057b0c375569ef808791d37b557b7e1e7b1))
--   remove hungarian notation ([4012bbf](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/4012bbf11871466ca12b679f43464b182e6a6ead))
+- add some line breaks ([10e6105](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/10e61057b0c375569ef808791d37b557b7e1e7b1))
+- remove hungarian notation ([4012bbf](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/4012bbf11871466ca12b679f43464b182e6a6ead))
 
 ### ✨ Refactor
 
--   check device is correct in callback ([91f37cb](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/91f37cb6beedfc7b8928cb7ebce6a0c5d58695b7))
--   never send empty payload ([7968484](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/7968484c3d08dcc4bbb31061062d35f9f90594b7))
--   update BuildPaylod function ([447dc34](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/447dc34b5598544cc9eb56056ba42fb1743031d2))
--   update passthru callback to latest signature ([9df375c](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/9df375c415605ad0dc92af47e94277d943bc5f0d))
+- check device is correct in callback ([91f37cb](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/91f37cb6beedfc7b8928cb7ebce6a0c5d58695b7))
+- never send empty payload ([7968484](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/7968484c3d08dcc4bbb31061062d35f9f90594b7))
+- update BuildPaylod function ([447dc34](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/447dc34b5598544cc9eb56056ba42fb1743031d2))
+- update passthru callback to latest signature ([9df375c](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/9df375c415605ad0dc92af47e94277d943bc5f0d))
