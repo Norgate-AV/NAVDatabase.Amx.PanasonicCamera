@@ -77,10 +77,10 @@ volatile char basicAuthB64[255]
 
 volatile char payload[NAV_MAX_BUFFER]
 
-volatile integer tiltSpeed     = 20
-volatile integer panSpeed      = 20
-volatile integer zoomSpeed     = 10
-volatile integer focusSpeed    = 10
+volatile integer tiltSpeed     = 40
+volatile integer panSpeed      = 40
+volatile integer zoomSpeed     = 20
+volatile integer focusSpeed    = 20
 
 volatile integer autoFocus = AUTO_FOCUS_STATUS_UNKNOWN
 
