@@ -55,8 +55,8 @@ constant integer AUTO_FOCUS_STATUS_UNKNOWN  = 0
 constant integer AUTO_FOCUS_STATUS_ON       = 1
 constant integer AUTO_FOCUS_STATUS_OFF      = 2
 
-constant integer DEFAULT_TILT_SPEED = 40
-constant integer DEFAULT_PAN_SPEED = 40
+constant integer DEFAULT_TILT_SPEED = 20
+constant integer DEFAULT_PAN_SPEED = 20
 constant integer DEFAULT_ZOOM_SPEED = 20
 constant integer DEFAULT_FOCUS_SPEED = 20
 
