@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.0](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/compare/v1.4.2...v1.5.0) (2024-12-12)
+
+### 🌟 Features
+
+- decrease default pan/tilt speed ([9bcc244](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/9bcc24402f1cae5d0bdd68be9f69ae981da15ba4))
+
 ## [1.4.2](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/compare/v1.4.1...v1.4.2) (2024-12-12)
 
 ### 🐛 Bug Fixes
