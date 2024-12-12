@@ -469,21 +469,49 @@ channel_event[vdvObject, 0] {
 
 level_event[vdvObject, TILT_SPEED_LVL] {
     context.tiltSpeed = level.value
+
+    if (context.tiltSpeed <= 0) {
+        context.tiltSpeed = DEFAULT_TILT_SPEED
+    }
+
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
+                "'mPanasonicCamera => Tilt Speed: ', itoa(level.value)")
 }
 
 
 level_event[vdvObject, PAN_SPEED_LVL] {
     context.panSpeed = level.value
+
+    if (context.panSpeed <= 0) {
+        context.panSpeed = DEFAULT_PAN_SPEED
+    }
+
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
+                "'mPanasonicCamera => Pan Speed: ', itoa(level.value)")
 }
 
 
 level_event[vdvObject, ZOOM_SPEED_LVL] {
     context.zoomSpeed = level.value
+
+    if (context.zoomSpeed <= 0) {
+        context.zoomSpeed = DEFAULT_ZOOM_SPEED
+    }
+
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
+                "'mPanasonicCamera => Zoom Speed: ', itoa(level.value)")
 }
 
 
 level_event[vdvObject, FOCUS_SPEED_LVL] {
     context.focusSpeed = level.value
+
+    if (context.focusSpeed <= 0) {
+        context.focusSpeed = DEFAULT_FOCUS_SPEED
+    }
+
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
+                "'mPanasonicCamera => Focus Speed: ', itoa(level.value)")
 }
 
 
