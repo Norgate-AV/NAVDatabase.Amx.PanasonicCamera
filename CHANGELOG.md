@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.1](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/compare/v1.4.0...v1.4.1) (2024-12-12)
+
+### 🐛 Bug Fixes
+
+- update virtual level count for ptz speeds ([ed2fc6e](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/ed2fc6eb940ba9d29b67c67993d8932e0b52565d))
+
 ## [1.4.0](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/compare/v1.3.0...v1.4.0) (2024-12-12)
 
 ### 🌟 Features
