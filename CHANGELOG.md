@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.0](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/compare/v1.3.0...v1.4.0) (2024-12-12)
+
+### 🌟 Features
+
+- add logging when ptz speeds change ([aa044b9](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/aa044b98a0f719f077297971b3873a7f0fcc9610))
+
 ## [1.3.0](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/compare/v1.2.0...v1.3.0) (2024-12-12)
 
 ### 🌟 Features
