@@ -258,6 +258,8 @@ define_function ContextInit(_Context context) {
 DEFINE_START {
     create_buffer dvPort, module.RxBuffer.Data
 
+    set_virtual_level_count(vdvObject, 30)
+
     ContextInit(context)
 }
 
