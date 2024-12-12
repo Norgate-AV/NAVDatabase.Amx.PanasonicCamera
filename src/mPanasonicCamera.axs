@@ -13,6 +13,7 @@ MODULE_NAME='mPanasonicCamera'  (
 #include 'NAVFoundation.ArrayUtils.axi'
 #include 'NAVFoundation.StringUtils.axi'
 #include 'NAVFoundation.Encoding.Base64.axi'
+#include 'LibPanasonicCamera.axi'
 
 /*
  _   _                       _          ___     __
@@ -55,14 +56,6 @@ DEFINE_DEVICE
 (***********************************************************)
 DEFINE_CONSTANT
 
-constant integer IP_PORT    = 80
-
-constant integer PTZ_STOP = 50
-
-constant integer AUTO_FOCUS_STATUS_UNKNOWN  = 0
-constant integer AUTO_FOCUS_STATUS_ON       = 1
-constant integer AUTO_FOCUS_STATUS_OFF      = 2
-
 (***********************************************************)
 (*              DATA TYPE DEFINITIONS GO BELOW             *)
 (***********************************************************)
@@ -73,20 +66,7 @@ DEFINE_TYPE
 (***********************************************************)
 DEFINE_VARIABLE
 
-volatile char basicAuthB64[255]
-
-volatile char payload[NAV_MAX_BUFFER]
-
-volatile integer tiltSpeed     = 40
-volatile integer panSpeed      = 40
-volatile integer zoomSpeed     = 20
-volatile integer focusSpeed    = 20
-
-volatile integer autoFocus = AUTO_FOCUS_STATUS_UNKNOWN
-
-volatile integer getAutoFocus = false
-
-volatile _NAVCredential credential = { '', '' }
+volatile _Context context
 
 
 (***********************************************************)
@@ -104,6 +84,7 @@ DEFINE_MUTUALLY_EXCLUSIVE
 (***********************************************************)
 (* EXAMPLE: DEFINE_FUNCTION <RETURN_TYPE> <NAME> (<PARAMETERS>) *)
 (* EXAMPLE: DEFINE_CALL '<NAME>' (<PARAMETERS>) *)
+
 define_function Send(char payload[]) {
     if (!length_array(payload)) {
         return
@@ -115,49 +96,7 @@ define_function Send(char payload[]) {
                                             payload))
 
     send_string dvPort, "payload"
-}
 
-
-define_function BuildPayload(char cmd[]) {
-    stack_var char result[NAV_MAX_BUFFER]
-
-    if (!length_array(module.Device.SocketConnection.Address) || module.Device.SocketConnection.IsConnected) {
-        return
-    }
-
-    if (!length_array(cmd)) {
-        return
-    }
-
-    result =    "
-                    'GET /cgi-bin/aw_ptz?cmd=', cmd, '&res=1 HTTP/1.1', NAV_CR, NAV_LF,
-                    // 'User-Agent: AMX-Master', NAV_CR, NAV_LF,
-                    'Host: ', module.Device.SocketConnection.Address, NAV_CR, NAV_LF,
-                    'Connection: Close', NAV_CR, NAV_LF
-                "
-
-    if (length_array(basicAuthB64)) {
-        result =    "
-                        result,
-                        'Authorization: Basic ', basicAuthB64, NAV_CR, NAV_LF
-                    "
-    }
-
-    if (!length_array(basicAuthB64) && length_array(credential.Username) && length_array(credential.Password)) {
-        result =    "
-                        result,
-                        'Authorization: Basic ', GetAuth(), NAV_CR, NAV_LF
-                    "
-    }
-
-    payload = "result, NAV_CR, NAV_LF"
-
-    OpenSocketConnection()
-}
-
-
-define_function char[NAV_MAX_CHARS] BuildCommand(char att[], char value[]) {
-    return "'#', att, value"
 }
 
 
@@ -173,15 +112,54 @@ define_function OpenSocketConnection() {
 }
 
 
+define_function BuildPayload(char type[], char cmd[]) {
+    stack_var char result[NAV_MAX_BUFFER]
+
+    if (!length_array(module.Device.SocketConnection.Address) || module.Device.SocketConnection.IsConnected) {
+        return
+    }
+
+    if (!length_array(cmd) || !length_array(type)) {
+        return
+    }
+
+    result =    "
+                    'GET /cgi-bin/aw_', type, '?cmd=', cmd, '&res=1 HTTP/1.1', NAV_CR, NAV_LF,
+                    // 'User-Agent: AMX-Master', NAV_CR, NAV_LF,
+                    'Host: ', module.Device.SocketConnection.Address, NAV_CR, NAV_LF,
+                    'Connection: Close', NAV_CR, NAV_LF
+                "
+
+    if (length_array(context.basicAuthB64)) {
+        result =    "
+                        result,
+                        'Authorization: Basic ', context.basicAuthB64, NAV_CR, NAV_LF
+                    "
+    }
+
+    if (!length_array(context.basicAuthB64) && length_array(context.credential.Username) && length_array(context.credential.Password)) {
+        result =    "
+                        result,
+                        'Authorization: Basic ', GetAuth(context.credential), NAV_CR, NAV_LF
+                    "
+    }
+
+    context.payload = "result, NAV_CR, NAV_LF"
+
+    if (!module.Device.SocketConnection.IsConnected) {
+        OpenSocketConnection()
+        return
+    }
+
+    Send(context.payload)
+}
+
+
 define_function Reset() {
     module.Device.SocketConnection.IsConnected = false
     module.Device.IsCommunicating = false
     module.Device.IsInitialized = false
-}
-
-
-define_function char[NAV_MAX_BUFFER] GetAuth() {
-    return NAVBase64Encode("credential.Username, ':', credential.Password")
+    context.payload = ''
 }
 
 
@@ -196,26 +174,27 @@ define_function NAVModulePropertyEventCallback(_NAVModulePropertyEvent event) {
             module.Device.SocketConnection.Address = NAVTrimString(event.Args[1])
             module.Device.SocketConnection.Port = IP_PORT
 
-            if (autoFocus == AUTO_FOCUS_STATUS_UNKNOWN) {
+            if (context.autoFocus == AUTO_FOCUS_STATUS_UNKNOWN) {
                 wait 50 {
-                    BuildPayload(BuildCommand('D1', ''))
+                    BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'D1', ''))
                 }
             }
         }
         case 'BASIC_AUTH_B64': {
             // Pass the base64 encoded string directly
-            basicAuthB64 = NAVTrimString(event.Args[1])
+            // Eg. YW14OjE5ODg= => amx:1988
+            context.basicAuthB64 = NAVTrimString(event.Args[1])
         }
         case 'BASIC_AUTH': {
             // Pass the username and password separated by a colon to be base64 encoded
             // Eg. username:password => amx:1988 => YW14OjE5ODg=
-            basicAuthB64 = NAVBase64Encode(NAVTrimString(event.Args[1]))
+            context.basicAuthB64 = NAVBase64Encode(NAVTrimString(event.Args[1]))
         }
         case 'USERNAME': {
-            credential.Username = NAVTrimString(event.Args[1])
+            context.credential.Username = NAVTrimString(event.Args[1])
         }
         case 'PASSWORD': {
-            credential.Password = NAVTrimString(event.Args[1])
+            context.credential.Password = NAVTrimString(event.Args[1])
         }
     }
 }
@@ -228,7 +207,12 @@ define_function NAVModulePassthruEventCallback(_NAVModulePassthruEvent event) {
         return
     }
 
-    BuildPayload(event.Payload)
+    if (NAVStartsWith(event.Payload, '#')) {
+        BuildPayload(COMMAND_TYPE_PTZ, event.Payload)
+        return
+    }
+
+    BuildPayload(COMMAND_TYPE_CAMERA, event.Payload)
 }
 #END_IF
 
@@ -249,11 +233,32 @@ define_function NAVStringGatherCallback(_NAVStringGatherResult args) {
 #END_IF
 
 
+define_function ContextInit(_Context context) {
+    context.payload = ''
+
+    context.basicAuthB64 = ''
+
+    context.tiltSpeed = DEFAULT_TILT_SPEED
+    context.panSpeed = DEFAULT_PAN_SPEED
+    context.zoomSpeed = DEFAULT_ZOOM_SPEED
+    context.focusSpeed = DEFAULT_FOCUS_SPEED
+
+    context.autoFocus = AUTO_FOCUS_STATUS_UNKNOWN
+
+    context.getAutoFocus = false
+
+    context.credential.Username = ''
+    context.credential.Password = ''
+}
+
+
 (***********************************************************)
 (*                STARTUP CODE GOES BELOW                  *)
 (***********************************************************)
 DEFINE_START {
     create_buffer dvPort, module.RxBuffer.Data
+
+    ContextInit(context)
 }
 
 (***********************************************************)
@@ -269,7 +274,7 @@ data_event[dvPort] {
             module.Device.SocketConnection.IsConnected = true
         }
 
-        Send(payload)
+        Send(context.payload)
     }
     offline: {
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'mPanasonicCamera => ', NAVDeviceToString(data.device), ' Socket Offline'")
@@ -279,9 +284,9 @@ data_event[dvPort] {
             Reset()
         }
 
-        if (getAutoFocus) {
-            BuildPayload(BuildCommand('D1', ''))
-            getAutoFocus = false
+        if (context.getAutoFocus) {
+            BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'D1', ''))
+            context.getAutoFocus = false
         }
     }
     onerror: {
@@ -301,10 +306,10 @@ data_event[dvPort] {
 
         select {
             active (NAVContains(data.text, 'd11')): {
-                autoFocus = AUTO_FOCUS_STATUS_ON
+                context.autoFocus = AUTO_FOCUS_STATUS_ON
             }
             active (NAVContains(data.text, 'd10')): {
-                autoFocus = AUTO_FOCUS_STATUS_OFF
+                context.autoFocus = AUTO_FOCUS_STATUS_OFF
             }
         }
 
@@ -330,10 +335,33 @@ data_event[vdvObject] {
 
         switch (message.Header) {
             case 'PRESET': {
-                BuildPayload(BuildCommand('R', format('%02d', atoi(message.Parameter[1]) - 1)))
+                BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'R', format('%02d', atoi(message.Parameter[1]) - 1)))
             }
             case 'PRESETSAVE': {
-                BuildPayload(BuildCommand('M', format('%02d', atoi(message.Parameter[1]) - 1)))
+                BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'M', format('%02d', atoi(message.Parameter[1]) - 1)))
+            }
+            case 'AUTOTRACK': {
+                switch (message.Parameter[1]) {
+                    case 'ON': {
+                        BuildPayload(COMMAND_TYPE_CAMERA, BuildCommand(COMMAND_TYPE_CAMERA, 'OSL:B6', '1'))
+                    }
+                    case 'OFF': {
+                        BuildPayload(COMMAND_TYPE_CAMERA, BuildCommand(COMMAND_TYPE_CAMERA, 'OSL:B6', '0'))
+                    }
+                }
+            }
+            case 'AUTOTRACK_ANGLE': {
+                switch (message.Parameter[1]) {
+                    case 'OFF': {
+                        BuildPayload(COMMAND_TYPE_CAMERA, BuildCommand(COMMAND_TYPE_CAMERA, 'OSL:B7', '0'))
+                    }
+                    case 'UPPER': {
+                        BuildPayload(COMMAND_TYPE_CAMERA, BuildCommand(COMMAND_TYPE_CAMERA, 'OSL:B7', '2'))
+                    }
+                    case 'FULL': {
+                        BuildPayload(COMMAND_TYPE_CAMERA, BuildCommand(COMMAND_TYPE_CAMERA, 'OSL:B7', '1'))
+                    }
+                }
             }
         }
     }
@@ -342,51 +370,51 @@ data_event[vdvObject] {
 
 channel_event[vdvObject, 0] {
     on: {
-        getAutoFocus = false
+        context.getAutoFocus = false
 
         switch (channel.channel) {
             case PWR_ON: {
-                BuildPayload(BuildCommand('O', '1'))
+                BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'O', '1'))
             }
             case PWR_OFF: {
-                BuildPayload(BuildCommand('O', '0'))
+                BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'O', '0'))
             }
             case TILT_UP: {
-                BuildPayload(BuildCommand('T', itoa(PTZ_STOP + tiltSpeed)))
+                BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'T', itoa(PTZ_STOP + context.tiltSpeed)))
             }
             case TILT_DN: {
-                BuildPayload(BuildCommand('T', itoa(PTZ_STOP - tiltSpeed)))
+                BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'T', itoa(PTZ_STOP - context.tiltSpeed)))
             }
             case PAN_LT: {
-                BuildPayload(BuildCommand('P', itoa(PTZ_STOP - panSpeed)))
+                BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'P', itoa(PTZ_STOP - context.panSpeed)))
             }
             case PAN_RT: {
-                BuildPayload(BuildCommand('P', itoa(PTZ_STOP + panSpeed)))
+                BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'P', itoa(PTZ_STOP + context.panSpeed)))
             }
             case ZOOM_IN: {
-                BuildPayload(BuildCommand('Z', itoa(PTZ_STOP + zoomSpeed)))
+                BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'Z', itoa(PTZ_STOP + context.zoomSpeed)))
             }
             case ZOOM_OUT: {
-                BuildPayload(BuildCommand('Z', itoa(PTZ_STOP - zoomSpeed)))
+                BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'Z', itoa(PTZ_STOP - context.zoomSpeed)))
             }
             case FOCUS_NEAR: {
-                BuildPayload(BuildCommand('F', itoa(PTZ_STOP + focusSpeed)))
+                BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'F', itoa(PTZ_STOP + context.focusSpeed)))
             }
             case FOCUS_FAR: {
-                BuildPayload(BuildCommand('F', itoa(PTZ_STOP - focusSpeed)))
+                BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'F', itoa(PTZ_STOP - context.focusSpeed)))
             }
             case AUTO_FOCUS_ON: {
-                getAutoFocus = true;
-                BuildPayload(BuildCommand('D1', '1'))
+                context.getAutoFocus = true;
+                BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'D1', '1'))
             }
             case AUTO_FOCUS: {
-                getAutoFocus = true;
+                context.getAutoFocus = true;
 
-                if (autoFocus == AUTO_FOCUS_STATUS_ON) {
-                    BuildPayload(BuildCommand('D1', '0'))
+                if (context.autoFocus == AUTO_FOCUS_STATUS_ON) {
+                    BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'D1', '0'))
                 }
                 else {
-                    BuildPayload(BuildCommand('D1', '1'))
+                    BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'D1', '1'))
                 }
 
             }
@@ -398,41 +426,41 @@ channel_event[vdvObject, 0] {
             case NAV_PRESET_6:
             case NAV_PRESET_7:
             case NAV_PRESET_8: {
-                BuildPayload(BuildCommand('R', format('%02d', NAVFindInArrayINTEGER(NAV_PRESET, channel.channel) - 1)))
+                BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'R', format('%02d', NAVFindInArrayINTEGER(NAV_PRESET, channel.channel) - 1)))
             }
         }
     }
     off: {
-        getAutoFocus = false;
+        context.getAutoFocus = false;
 
         switch (channel.channel) {
             case TILT_UP:
             case TILT_DN: {
                 wait 1 {
-                    BuildPayload(BuildCommand('T', itoa(PTZ_STOP)))
+                    BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'T', itoa(PTZ_STOP)))
                 }
             }
             case PAN_LT:
             case PAN_RT: {
                 wait 1 {
-                    BuildPayload(BuildCommand('P', itoa(PTZ_STOP)))
+                    BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'P', itoa(PTZ_STOP)))
                 }
             }
             case ZOOM_IN:
             case ZOOM_OUT: {
                 wait 1 {
-                    BuildPayload(BuildCommand('Z', itoa(PTZ_STOP)))
+                    BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'Z', itoa(PTZ_STOP)))
                 }
             }
             case FOCUS_NEAR:
             case FOCUS_FAR: {
                 wait 1 {
-                    BuildPayload(BuildCommand('F', itoa(PTZ_STOP)))
+                    BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'F', itoa(PTZ_STOP)))
                 }
             }
             case AUTO_FOCUS_ON: {
-                getAutoFocus = true;
-                BuildPayload(BuildCommand('D1', '0'))
+                context.getAutoFocus = true;
+                BuildPayload(COMMAND_TYPE_PTZ, BuildCommand(COMMAND_TYPE_PTZ, 'D1', '0'))
             }
         }
     }
@@ -440,27 +468,27 @@ channel_event[vdvObject, 0] {
 
 
 level_event[vdvObject, TILT_SPEED_LVL] {
-    tiltSpeed = level.value
+    context.tiltSpeed = level.value
 }
 
 
 level_event[vdvObject, PAN_SPEED_LVL] {
-    panSpeed = level.value
+    context.panSpeed = level.value
 }
 
 
 level_event[vdvObject, ZOOM_SPEED_LVL] {
-    zoomSpeed = level.value
+    context.zoomSpeed = level.value
 }
 
 
 level_event[vdvObject, FOCUS_SPEED_LVL] {
-    focusSpeed = level.value
+    context.focusSpeed = level.value
 }
 
 
 timeline_event[TL_NAV_FEEDBACK] {
-    [vdvObject, AUTO_FOCUS_FB] = (autoFocus == AUTO_FOCUS_STATUS_ON)
+    [vdvObject, AUTO_FOCUS_FB] = (context.autoFocus == AUTO_FOCUS_STATUS_ON)
 }
 
 
