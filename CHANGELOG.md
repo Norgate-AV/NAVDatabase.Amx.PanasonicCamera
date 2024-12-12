@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.3.0](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/compare/v1.2.0...v1.3.0) (2024-12-12)
+
+### 🌟 Features
+
+- add tracking controls ([2e3ed56](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/2e3ed56cd1b712910724b6ec8cbac0e93f07e5f5))
+
 ## [1.2.0](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/compare/v1.1.0...v1.2.0) (2024-12-09)
 
 ### 🌟 Features
