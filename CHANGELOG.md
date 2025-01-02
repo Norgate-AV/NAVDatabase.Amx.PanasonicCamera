@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.6.0](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/compare/v1.5.0...v1.6.0) (2025-01-02)
+
+### 🌟 Features
+
+- implement queueing to allow for finer control ([d4042d7](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/d4042d7c71f003265b14319e0c3af880bce7b00b))
+
 ## [1.5.0](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/compare/v1.4.2...v1.5.0) (2024-12-12)
 
 ### 🌟 Features
