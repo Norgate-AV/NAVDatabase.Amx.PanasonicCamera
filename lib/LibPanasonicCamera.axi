@@ -3,6 +3,7 @@ PROGRAM_NAME='LibPanasonicCamera'
 (***********************************************************)
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.Encoding.Base64.axi'
+#include 'NAVFoundation.Queue.axi'
 
 /*
  _   _                       _          ___     __
@@ -60,11 +61,36 @@ constant integer DEFAULT_PAN_SPEED = 20
 constant integer DEFAULT_ZOOM_SPEED = 20
 constant integer DEFAULT_FOCUS_SPEED = 20
 
+constant integer AUTO_TRACK_STATUS_UNKNOWN  = 0
+constant integer AUTO_TRACK_STATUS_ON       = 1
+constant integer AUTO_TRACK_STATUS_OFF      = 2
+
+constant integer AUTO_TRACK_ANGLE_STATUS_UNKNOWN  = 0
+constant integer AUTO_TRACK_ANGLE_STATUS_FULL     = 1
+constant integer AUTO_TRACK_ANGLE_STATUS_UPPER    = 2
+constant integer AUTO_TRACK_ANGLE_STATUS_OFF      = 3
+
+// Channels
+constant integer AUTO_TRACK_ON  = 301
+constant integer AUTO_TRACK_OFF = 302
+constant integer AUTO_TRACK_FB  = 331
+
+constant integer AUTO_TRACK_ANGLE_FULL  = 311
+constant integer AUTO_TRACK_ANGLE_UPPER = 312
+constant integer AUTO_TRACK_ANGLE_OFF   = 313
+
+constant integer AUTO_TRACK_ANGLE_FULL_FB  = 341
+constant integer AUTO_TRACK_ANGLE_UPPER_FB = 342
+constant integer AUTO_TRACK_ANGLE_OFF_FB   = 343
+
 
 DEFINE_TYPE
 
 struct _Context {
+    _NAVQueue queue
+
     char payload[NAV_MAX_BUFFER]
+    char lastCommand[NAV_MAX_BUFFER]
 
     char basicAuthB64[255]
 
@@ -74,10 +100,13 @@ struct _Context {
     integer focusSpeed
 
     integer autoFocus
-
-    integer getAutoFocus
+    integer autoTrack
+    integer autoTrackAngle
 
     _NAVCredential credential
+
+    char firstConnectionEstablished
+    char initialized
 }
 
 
