@@ -11,7 +11,10 @@
     "bugs": {
         "url": "https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/issues"
     },
-    "dependencies": {
-        "NAVFoundation.Amx": "latest"
-    }
+    "dependencies": [
+        {
+            "version": "^1.25.0",
+            "url": "github.com/Norgate-AV/NAVFoundation.Amx"
+        }
+    ]
 }
