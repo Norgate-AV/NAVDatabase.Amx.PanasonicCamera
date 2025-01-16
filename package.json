@@ -17,7 +17,7 @@
         "url": "https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/issues"
     },
     "engines": {
-        "node": ">=18"
+        "node": ">=20"
     },
     "scripts": {
         "build": "pwsh ./build.ps1",
@@ -41,7 +41,7 @@
         "cz-conventional-changelog": "3.3.0",
         "doctoc": "^2.2.1",
         "husky": "^9.1.7",
-        "lint-staged": "^15.3.0",
+        "lint-staged": "^15.4.0",
         "prettier": "^3.4.2",
         "semantic-release": "^24.2.1"
     }
