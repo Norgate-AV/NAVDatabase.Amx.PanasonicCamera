@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.6.1](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/compare/v1.6.0...v1.6.1) (2025-01-16)
+
+### 🐛 Bug Fixes
+
+- fix release scripts ([42a771d](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/42a771dcf7443a3464e7c85acecb2903dda46d4d))
+
 ## [1.6.0](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/compare/v1.5.0...v1.6.0) (2025-01-02)
 
 ### 🌟 Features
