@@ -161,10 +161,6 @@ define_function BuildPayload(char type[], char cmd[]) {
     }
 
     payload = "result, NAV_CR, NAV_LF"
-
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                "'mPanasonicCamera => ', NAVDeviceToString(dvPort), ' Enqueueing: ', GetCommand(payload)")
-
     NAVQueueEnqueue(context.queue, payload)
 
     if (!module.Device.SocketConnection.IsConnected) {
@@ -176,9 +172,6 @@ define_function BuildPayload(char type[], char cmd[]) {
     }
 
     context.payload = NAVQueueDequeue(context.queue)
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                "'mPanasonicCamera => ', NAVDeviceToString(dvPort), ' Sending Immediately: ', GetCommand(context.payload)")
-
     Send(context.payload)
 }
 
@@ -655,11 +648,6 @@ data_event[dvPort] {
 data_event[vdvObject] {
     command: {
         stack_var _NAVSnapiMessage message
-
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                    NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_COMMAND_FROM,
-                                                data.device,
-                                                data.text))
 
         NAVParseSnapiMessage(data.text, message)
 
