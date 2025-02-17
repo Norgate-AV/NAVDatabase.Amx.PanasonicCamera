@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.7.0](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/compare/v1.6.3...v1.7.0) (2025-02-17)
+
+### 🌟 Features
+
+- bump NAVFoundation.Amx to 1.27.0 ([b7b1bfa](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/b7b1bfae2b2ca6e5fe2b33e192c7c045fd03b8b9))
+
 ## [1.6.3](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/compare/v1.6.2...v1.6.3) (2025-02-16)
 
 ### 🚀 Performance
