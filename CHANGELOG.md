@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.8.0](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/compare/v1.7.0...v1.8.0) (2025-02-20)
+
+### 🌟 Features
+
+- use NAVFoundation.HttpUtils lib for HTTP requests ([b15ec25](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/b15ec25e6208eed78ad08a14330d1f2c85337c60))
+
+### 🐛 Bug Fixes
+
+- use http in url ([be19ea3](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/be19ea3939bfa331f76a400ad90dafc9cfedf909))
+
 ## [1.7.0](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/compare/v1.6.3...v1.7.0) (2025-02-17)
 
 ### 🌟 Features
