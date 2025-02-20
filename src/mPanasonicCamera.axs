@@ -143,7 +143,10 @@ define_function BuildPayload(char type[], char cmd[]) {
         return
     }
 
-    endpoint = GetApiEndpoint("'aw_', type, '?cmd=', cmd, '&res=1'")
+    endpoint = GetApiEndpoint(
+        module.Device.SocketConnection.Address,
+        "'aw_', type, '?cmd=', cmd, '&res=1'"
+    )
 
     if (!NAVParseUrl(endpoint, url)) {
         NAVErrorLog(NAV_LOG_LEVEL_ERROR,
