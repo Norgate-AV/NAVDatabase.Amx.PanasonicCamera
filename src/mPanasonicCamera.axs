@@ -14,6 +14,8 @@ MODULE_NAME='mPanasonicCamera'  (
 #include 'NAVFoundation.StringUtils.axi'
 #include 'NAVFoundation.Encoding.Base64.axi'
 #include 'NAVFoundation.Queue.axi'
+#include 'NAVFoundation.Url.axi'
+#include 'NAVFoundation.HttpUtils.axi'
 #include 'LibPanasonicCamera.axi'
 
 /*
@@ -127,10 +129,13 @@ define_function OpenSocketConnection() {
 
 
 define_function BuildPayload(char type[], char cmd[]) {
-    stack_var char result[NAV_MAX_BUFFER]
+    stack_var _NAVUrl url
+    stack_var _NAVHttpRequest request
+    stack_var char endpoint[255]
     stack_var char payload[NAV_MAX_BUFFER]
 
-    if (!length_array(module.Device.SocketConnection.Address) || module.Device.SocketConnection.IsConnected) {
+    if (!length_array(module.Device.SocketConnection.Address) ||
+        module.Device.SocketConnection.IsConnected) {
         return
     }
 
@@ -138,29 +143,39 @@ define_function BuildPayload(char type[], char cmd[]) {
         return
     }
 
-    result =    "
-                    'GET /cgi-bin/aw_', type, '?cmd=', cmd, '&res=1 HTTP/1.1', NAV_CR, NAV_LF,
-                    // 'User-Agent: AMX-Master', NAV_CR, NAV_LF,
-                    'Host: ', module.Device.SocketConnection.Address, NAV_CR, NAV_LF,
-                    'Connection: Close', NAV_CR, NAV_LF
-                    // 'Connection: Keep-Alive', NAV_CR, NAV_LF
-                "
+    endpoint = GetApiEndpoint("'aw_', type, '?cmd=', cmd, '&res=1'")
+
+    if (!NAVParseUrl(endpoint, url)) {
+        NAVErrorLog(NAV_LOG_LEVEL_ERROR,
+                    "'mPanasonicCamera => ', NAVDeviceToString(dvPort), ': Failed to parse URL'")
+
+        return
+    }
+
+    if (!NAVHttpRequestInit(request, NAV_HTTP_METHOD_GET, url, '')) {
+        NAVErrorLog(NAV_LOG_LEVEL_ERROR,
+                    "'mPanasonicCamera => ', NAVDeviceToString(dvPort), ': Failed to initialize HTTP request'")
+
+        return
+    }
+
+    NAVHttpRequestAddHeader(request, NAV_HTTP_HEADER_CONNECTION, 'Close')
 
     if (length_array(context.basicAuthB64)) {
-        result =    "
-                        result,
-                        'Authorization: Basic ', context.basicAuthB64, NAV_CR, NAV_LF
-                    "
+        NAVHttpRequestAddHeader(request, NAV_HTTP_HEADER_AUTHORIZATION, "'Basic ', context.basicAuthB64")
     }
 
     if (!length_array(context.basicAuthB64) && length_array(context.credential.Username) && length_array(context.credential.Password)) {
-        result =    "
-                        result,
-                        'Authorization: Basic ', GetAuth(context.credential), NAV_CR, NAV_LF
-                    "
+        NAVHttpRequestAddHeader(request, NAV_HTTP_HEADER_AUTHORIZATION, "'Basic ', GetAuth(context.credential)")
     }
 
-    payload = "result, NAV_CR, NAV_LF"
+    if (!NAVHttpBuildRequest(request, payload)) {
+        NAVErrorLog(NAV_LOG_LEVEL_ERROR,
+                    "'mPanasonicCamera => ', NAVDeviceToString(dvPort), ': Failed to build HTTP request'")
+
+        return
+    }
+
     NAVQueueEnqueue(context.queue, payload)
 
     if (!module.Device.SocketConnection.IsConnected) {

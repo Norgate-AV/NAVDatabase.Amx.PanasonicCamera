@@ -123,6 +123,15 @@ define_function char[NAV_MAX_CHARS] BuildCommand(char type[], char cmd[], char d
 }
 
 
+define_function char[NAV_MAX_BUFFER] GetApiEndpoint(char cmd[]) {
+    if (NAVStartsWith(cmd, '/')) {
+        cmd = NAVStripLeft(cmd, 1)
+    }
+
+    return "'https://', module.Device.SocketConnection.Address, '/cgi-bin/', cmd"
+}
+
+
 define_function char[NAV_MAX_BUFFER] GetAuth(_NAVCredential credential) {
     return NAVBase64Encode("credential.Username, ':', credential.Password")
 }
