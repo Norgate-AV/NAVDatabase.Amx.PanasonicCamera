@@ -40,7 +40,8 @@ SOFTWARE.
 #IF_NOT_DEFINED __LIB_PANASONIC_CAMERA__
 #DEFINE __LIB_PANASONIC_CAMERA__ 'LibPanasonicCamera'
 
-#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Core.h.axi'
+#include 'NAVFoundation.StringUtils.axi'
 
 
 DEFINE_CONSTANT

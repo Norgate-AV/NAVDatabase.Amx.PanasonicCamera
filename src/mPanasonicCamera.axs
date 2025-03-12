@@ -12,6 +12,8 @@ MODULE_NAME='mPanasonicCamera'  (
 #include 'NAVFoundation.SocketUtils.axi'
 #include 'NAVFoundation.ArrayUtils.axi'
 #include 'NAVFoundation.StringUtils.axi'
+#include 'NAVFoundation.TimelineUtils.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.Encoding.Base64.axi'
 #include 'NAVFoundation.Queue.axi'
 #include 'NAVFoundation.Url.axi'
@@ -321,6 +323,8 @@ define_function NAVStringGatherCallback(_NAVStringGatherResult args) {
             }
         }
 
+        UpdateFeedback()
+
         return
     }
 
@@ -380,6 +384,8 @@ define_function NAVStringGatherCallback(_NAVStringGatherResult args) {
             context.initialized = true
         }
     }
+
+    UpdateFeedback()
 }
 #END_IF
 
@@ -404,6 +410,8 @@ define_function ContextInit(_Context context) {
 
     context.firstConnectionEstablished = false
     context.initialized = false
+
+    UpdateFeedback()
 
     NAVQueueInit(context.queue, 50)
 }
@@ -580,6 +588,16 @@ define_function Init() {
     OpenSocketConnection()
 }
 
+
+define_function UpdateFeedback() {
+    [vdvObject, AUTO_FOCUS_FB] = (context.autoFocus == AUTO_FOCUS_STATUS_ON)
+    [vdvObject, AUTO_TRACK_FB] = (context.autoTrack == AUTO_TRACK_STATUS_ON)
+    [vdvObject, AUTO_TRACK_ANGLE_FULL_FB] = (context.autoTrackAngle == AUTO_TRACK_ANGLE_STATUS_FULL)
+    [vdvObject, AUTO_TRACK_ANGLE_UPPER_FB] = (context.autoTrackAngle == AUTO_TRACK_ANGLE_STATUS_UPPER)
+    [vdvObject, AUTO_TRACK_ANGLE_OFF_FB] = (context.autoTrackAngle == AUTO_TRACK_ANGLE_STATUS_OFF)
+}
+
+
 (***********************************************************)
 (*                STARTUP CODE GOES BELOW                  *)
 (***********************************************************)
@@ -740,15 +758,6 @@ timeline_event[TL_SOCKET_FIRST_CONNECTION_RETRY] {
 
 timeline_event[TL_INIT_WAIT] {
     Init()
-}
-
-
-timeline_event[TL_NAV_FEEDBACK] {
-    [vdvObject, AUTO_FOCUS_FB] = (context.autoFocus == AUTO_FOCUS_STATUS_ON)
-    [vdvObject, AUTO_TRACK_FB] = (context.autoTrack == AUTO_TRACK_STATUS_ON)
-    [vdvObject, AUTO_TRACK_ANGLE_FULL_FB] = (context.autoTrackAngle == AUTO_TRACK_ANGLE_STATUS_FULL)
-    [vdvObject, AUTO_TRACK_ANGLE_UPPER_FB] = (context.autoTrackAngle == AUTO_TRACK_ANGLE_STATUS_UPPER)
-    [vdvObject, AUTO_TRACK_ANGLE_OFF_FB] = (context.autoTrackAngle == AUTO_TRACK_ANGLE_STATUS_OFF)
 }
 
 
