@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.10.0](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/compare/v1.9.0...v1.10.0) (2025-09-20)
+
+### 🌟 Features
+
+- update for NAVFoundation v3+ ([c50dd60](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/commit/c50dd60291e69263250ac399d0d1cf5b2c1a8b75))
+
 ## [1.9.0](https://github.com/Norgate-AV/NAVDatabase.Amx.PanasonicCamera/compare/v1.8.0...v1.9.0) (2025-03-12)
 
 ### 🌟 Features
